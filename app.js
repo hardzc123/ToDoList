@@ -2,7 +2,7 @@
 
 // const MongoClient = require('mongodb').MongoClient;
 // const assert = require('assert');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // https://mongoosejs.com/docs/models.html#deleting
 
 // const url = 'mongodb://localhost:27017';
 // const dbName = "shopDB";
@@ -46,14 +46,23 @@ mongoose.connect("mongodb://localhost:27017/fruitsDB",{useUnifiedTopology: true}
 //   });
 // }
 const fruitSchema = new mongoose.Schema ({
-  name: String,
-  rating: Number,
-  review: String
+  name: {
+    type: String,
+    required: [true, 'Why no name?']
+  },
+  // data validator ,  like Excel
+  rating: {
+    type: Number,
+    min: 1,
+    max: 10
+  },
+  review: String,
+  // position: positionSchema
 });
 
 const Fruit = mongoose.model("Fruits", fruitSchema);
 const apple = new Fruit({
-  name:"Apple",
+  //name:"Apple",
   rating: 7,
   review:"pretty solid"
 });
@@ -71,11 +80,32 @@ const kiwi = new Fruit({
 });
 
 // fruit.save();
-Fruit.insertMany([apple, banana, kiwi], function(err){
+
+// Fruit.insertMany([apple, banana, kiwi], function(err){
+//   if(err){
+//     console.log(err);
+//   } else{
+//     console.log("successfully saved all the fruits to fruitsDB");
+//   }
+// });
+
+Fruit.updateOne({name: "Apple"}, {name: "BigApple"}, function(err){
   if(err){
     console.log(err);
   } else{
-    console.log("successfully saved all the fruits to fruitsDB");
+    console.log("successfully update apple");
+  }
+});
+
+Fruit.find(function(err, fruits){
+  if(err){
+    console.log(err);
+  } else{
+    //console.log(fruits);
+
+    fruits.forEach(function(fruit){
+      console.log(fruit.name);
+    });
   }
 });
 
