@@ -18,7 +18,9 @@ const mongoose = require('mongoose'); // https://mongoosejs.com/docs/models.html
 //     client.close();
 //   })
 // });
-mongoose.connect("mongodb://localhost:27017/fruitsDB",{useUnifiedTopology: true});
+
+// create a database, if there isn't the database
+mongoose.connect("mongodb://localhost:27017/todolistDB",{useUnifiedTopology: true});
 
 // const insertDocuments = function(db, callback) {
 //   const collection = db.collection('fruits');
@@ -45,39 +47,39 @@ mongoose.connect("mongodb://localhost:27017/fruitsDB",{useUnifiedTopology: true}
 //     callback(result);
 //   });
 // }
-const fruitSchema = new mongoose.Schema ({
-  name: {
-    type: String,
-    required: [true, 'Why no name?']
-  },
-  // data validator ,  like Excel
-  rating: {
-    type: Number,
-    min: 1,
-    max: 10
-  },
-  review: String,
-  // position: positionSchema
-});
+// const fruitSchema = new mongoose.Schema ({
+//   name: {
+//     type: String,
+//     required: [true, 'Why no name?']
+//   },
+//   // data validator ,  like Excel
+//   rating: {
+//     type: Number,
+//     min: 1,
+//     max: 10
+//   },
+//   review: String,
+//   // position: positionSchema
+// });
 
-const Fruit = mongoose.model("Fruits", fruitSchema);
-const apple = new Fruit({
-  //name:"Apple",
-  rating: 7,
-  review:"pretty solid"
-});
-
-const banana = new Fruit({
-  name:"Banana",
-  rating: 7,
-  review:"pretty solid"
-});
-
-const kiwi = new Fruit({
-  name:"Kiwi",
-  rating: 7,
-  review:"pretty solid"
-});
+// const Fruit = mongoose.model("Fruits", fruitSchema);
+// const apple = new Fruit({
+//   //name:"Apple",
+//   rating: 7,
+//   review:"pretty solid"
+// });
+//
+// const banana = new Fruit({
+//   name:"Banana",
+//   rating: 7,
+//   review:"pretty solid"
+// });
+//
+// const kiwi = new Fruit({
+//   name:"Kiwi",
+//   rating: 7,
+//   review:"pretty solid"
+// });
 
 // fruit.save();
 
@@ -89,25 +91,53 @@ const kiwi = new Fruit({
 //   }
 // });
 
-Fruit.updateOne({name: "Apple"}, {name: "BigApple"}, function(err){
-  if(err){
-    console.log(err);
-  } else{
-    console.log("successfully update apple");
-  }
+// Fruit.updateOne({name: "Apple"}, {name: "BigApple"}, function(err){
+//   if(err){
+//     console.log(err);
+//   } else{
+//     console.log("successfully update apple");
+//   }
+// });
+//
+// Fruit.find(function(err, fruits){
+//   if(err){
+//     console.log(err);
+//   } else{
+//     //console.log(fruits);
+//
+//     fruits.forEach(function(fruit){
+//       console.log(fruit.name);
+//     });
+//   }
+// });
+//
+
+const todolistSchema = new mongoose.Schema({
+  name: String
 });
 
-Fruit.find(function(err, fruits){
-  if(err){
-    console.log(err);
-  } else{
-    //console.log(fruits);
+// let items = ["Clean", "Penny", "Java"];
+const Item = mongoose.model("Item", todolistSchema);
+// const item1 = new Item({
+//   name:"The first item"
+// });
+// const item2 = new Item({
+//   name:"The second item"
+// });
+// const item3 = new Item({
+//   name:"The third item"
+// });
 
-    fruits.forEach(function(fruit){
-      console.log(fruit.name);
-    });
-  }
-});
+// let items = [item1, item2, item3];
+
+// Item.insertMany(items, function(err){
+//   if(err){
+//     console.log(err);
+//   }else{
+//     console.log("successfully insert many items in database!");
+//   }
+// });
+
 
 
 
@@ -117,7 +147,7 @@ const bodyParser = require("body-parser"); //let app = express();
 const app = express();
 app.set('view engine', 'ejs'); // using ejs
 
-let items = ["Clean", "Penny", "Java"];
+
 
 
 
@@ -126,30 +156,51 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(express.static("public")); // find the css files
 
-app.get("/", function(req, res) {
+app.get("/", function(req, res) {  // frontend get from backend
   var today = new Date();
-  var day = "";
+  // var day = "";
+  //
+  // var options = {
+  //   weekday: "long",
+  //   day: "numeric",
+  //   month: "long"
+  // };
 
-  var options = {
-    weekday: "long",
-    day: "numeric",
-    month: "long"
-  };
-
-  var day = today.toLocaleDateString("en-US", options);
-
-
-  res.render("list", {
-    kindOfDay: day,
-    newItem: items
+  // var day = today.toLocaleDateString("en-US", options);
+  Item.find({},function(err,foundItems){
+    console.log("successfully found items in database, and render them on frontend");
+    res.render("list", {
+      kindOfDay: today,
+      newItem: foundItems
+    });
   });
+
+  // res.render("list", {
+  //   kindOfDay: today,
+  //   // newItem: items
+  //   newItem: foundItems
+  // });
 });
 
-app.post("/", function(req, res) {
-  var item = req.body.newItem;
-
-  items.push(item);
+app.post("/", function(req, res) {  // frontend post to backend
+  const itemName = req.body.newItem;
+  const item = new Item({
+    name: itemName
+  })
+  item.save();
+  // items.push(item);
   console.log(item);
+  res.redirect("/");
+});
+
+app.post("/delete", function(req, res){
+  const checkedItemId = req.body.checkbox;
+
+  Item.findByIdAndRemove(checkedItemId, function(err){
+    if(!err){
+      console.log("successfully delete the item");
+    }
+  });
   res.redirect("/");
 });
 
