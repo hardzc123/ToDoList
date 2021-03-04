@@ -3,5 +3,6 @@
  https://agile-hollows-45905.herokuapp.com/
 
 ### Using Heroku and MongoDB Cloud (AWS)
-
+### Init
+npm install
  
