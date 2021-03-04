@@ -20,8 +20,8 @@ const mongoose = require('mongoose'); // https://mongoosejs.com/docs/models.html
 // });
 
 // create a database, if there isn't the database
-mongoose.connect("mongodb://localhost:27017/todolistDB",{useUnifiedTopology: true});
-
+// mongoose.connect("mongodb://localhost:27017/todolistDB",{useUnifiedTopology: true});
+mongoose.connect("mongodb+srv://admin-chi:zhangchi@cluster0.8ipdb.mongodb.net/todolistDB",{useUnifiedTopology: true});
 // const insertDocuments = function(db, callback) {
 //   const collection = db.collection('fruits');
 //   collection.insertMany([{
@@ -204,6 +204,13 @@ app.post("/delete", function(req, res){
   res.redirect("/");
 });
 
-app.listen(3100, function() {
-  console.log("Server started on port 3100.");
+let port = process.env.PORT;
+if (port == null || port == "") {
+  port = 3000;
+}
+app.listen(port);
+
+
+app.listen(port, function() {
+  console.log("Server started successfully online through heroku.");
 });
